@@ -41,4 +41,3 @@ model Posts_Languages {
 
   @@id([post_id, language_id])
 }
- 
