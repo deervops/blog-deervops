@@ -9,3 +9,36 @@ datasource db {
   provider = "mysql"
   url      = "mysql://root:123456@localhost:3306/deervops"
 }
+
+model Post {
+  id          String            @id @default(uuid())
+  title       String            @unique
+  description String            @db.VarChar(75)
+  content     String            @db.Text
+  created_at  DateTime          @default(now())
+  img         String
+  stacks      Posts_Languages[]
+
+  @@map("posts")
+}
+
+model Languages {
+  id    String            @id @default(uuid())
+  name  String            @unique @db.VarChar(30)
+  posts Posts_Languages[]
+
+  @@map("languages")
+}
+
+//Posts_Languages se relaciona com outras duas tabelas (Post e Languages)
+model Posts_Languages {
+  post     Post      @relation(fields: [post_id], references: [id])
+  language Languages @relation(fields: [language_id], references: [id])
+
+  //id do post faz referencia ao id da linguagem
+  post_id     String
+  language_id String
+
+  @@id([post_id, language_id])
+}
+ 
