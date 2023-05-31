@@ -1,55 +1,85 @@
 version: '3.9'
 services:
   frontend:
+    # Define o nome do container como "app_frontend"
     container_name: app_frontend
+    # Constrói a imagem a partir do diretório "./frontend"
     build: ./frontend
     ports:
+    # Mapeia a porta 3000 do host para a porta 3000 do container
       - 3000:3000
+    # Define o diretório de trabalho como "/app-frontend"
     working_dir: /app-frontend
-    # Os `healthcheck` devem garantir que a aplicação
-    # está operacional, antes de liberar o container
+    # O `healthcheck` deve garantir que a aplicação está operacional, antes de liberar o container
     healthcheck:
-      test: ["CMD", "lsof", "-t", "-i:3000"]  # Caso utilize outra porta interna para o front, altere ela aqui também
+    # Define o teste de verificação de saúde usando o comando "lsof" para verificar se a porta 3000 está em uso
+      test: ["CMD", "lsof", "-t", "-i:3000"]  # Caso use outra porta para o front, altere ela aqui também
+      # Define um tempo limite de 10 segundos para o teste de verificação de saúde
       timeout: 10s
+      # Tenta verificar a saúde 5 vezes antes de considerar o contêiner como não saudável
       retries: 5
   backend:
+    # Define o nome do container como "app_backend"
     container_name: app_backend
+    # Constrói a imagem a partir do diretório "./backend"
     build: ./backend
+    # Mapeia a porta 3001 do host para a porta 3001 do container
     ports:
       - 3001:3001
+    # Define o diretório de trabalho como "/app-backend"
     working_dir: /app-backend
-    # Caso queira que o container esteja atualizado durante o desenvolvimento, sem que você precise ficar fazendo down e up dos containers, descomente as 3 linhas abaixo
-    command: dev 
+    # Define o comando a ser executado quando o contêiner iniciar
+    command: dev
+    # Mapeia o diretório "./backend/src" do host para o diretório "/app-backend/src" do container
     volumes: 
       - ./backend/src:/app-backend/src
+    # Define a dependência do serviço "db" e especifica que o contêiner depende do serviço estar saudável
     depends_on:
       db:
         condition: service_healthy
+    # Os dados abaixo se referem ao container `db`
     environment:
-      # Os dados abaixo se referem ao container `db`
-      # Dica: Relembre aqui da comunicação interna entre containers
+    # Define a variável de ambiente "APP_PORT" como "3001"
       - APP_PORT=3001
+    # Define a variável de ambiente "DB_USER" como "root"
       - DB_USER=root
+    # Define a variável de ambiente "DB_PASS" como "123456"
       - DB_PASS=123456
+    # Define a variável de ambiente "DB_HOST" como "db"
       - DB_HOST=db
+    # Define a variável de ambiente "DB_PORT" como "3306"
       - DB_PORT=3306
+    # Define o teste de verificação de saúde usando o comando "lsof" para verificar se a porta 3001 está em uso
     healthcheck:
-      test: ["CMD", "lsof", "-t", "-i:3001"] # Caso utilize outra porta interna para o back, altere ela aqui também
+      test: ["CMD", "lsof", "-t", "-i:3001"] # Caso utilize outra porta para o back, altere aqui também
+      # Define um tempo limite de 10 segundos para o teste de verificação de saúde
       timeout: 10s
+      # Tenta verificar a saúde 5 vezes antes de considerar o contêiner como não saudável
       retries: 5
   db:
+    # Usa a imagem "mysql:8.0.32" do Docker Hub
     image: mysql:8.0.32
+    # Define o nome do container como "db"
     container_name: db
+    # Mapeia a porta 3306 do host para a porta 3306 do container
     ports:
       - 3306:3306
+    # Define a variável de ambiente "MYSQL_ROOT_PASSWORD" como "123456"  
     environment:
       - MYSQL_ROOT_PASSWORD=123456
+    # Configura o reinício automático do contêiner em caso de falha
     restart: 'always'
+    # Define o teste de verificação de saúde para verificar se o banco está operacional
     healthcheck:
+      # Define o teste de verificação de saúde usando o comando "mysqladmin ping -h localhost"
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"] # Deve aguardar o banco ficar operacional
+      # Define um tempo limite de 10 segundos para o teste de verificação de saúde
       timeout: 10s
+      # Tenta verificar a saúde 5 vezes antes de considerar o contêiner como não saudável
       retries: 5
+    # Mapeia o diretório "./mysql_data" do host para o diretório "/var/lib/mysql_data" do container
     volumes:
-      - ./mysql_data:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql_data
+    # Adiciona a capacidade "SYS_NICE" ao contêiner, o que permite omitir alertas menores
     cap_add:
       - SYS_NICE # Deve omitir alertas menores
