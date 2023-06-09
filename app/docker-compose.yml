@@ -29,14 +29,14 @@ services:
     # Define o diretório de trabalho como "/app-backend"
     working_dir: /app-backend
     # Define o comando a ser executado quando o contêiner iniciar
-    command: dev
+    # command: dev
     # Mapeia o diretório "./backend/src" do host para o diretório "/app-backend/src" do container
     volumes: 
       - ./backend/src:/app-backend/src
     # Define a dependência do serviço "db" e especifica que o contêiner depende do serviço estar saudável
-    depends_on:
-      db:
-        condition: service_healthy
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
     # Os dados abaixo se referem ao container `db`
     environment:
     # Define a variável de ambiente "APP_PORT" como "3001"
